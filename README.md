@@ -36,7 +36,40 @@ npm run dev
 - Swagger: http://localhost:8000/docs
 - Frontend: http://localhost:5173
 
+The frontend reads `VITE_API_BASE_URL` when Vite builds the application. Use
+`http://localhost:8000` locally and set it to
+`https://orderflow-zo5f.onrender.com` in the Render frontend environment.
+Changing this variable requires a new frontend build and redeployment; it is
+not read dynamically by the browser at runtime.
+
 API reference: [docs/api.md](docs/api.md)
+
+## Render deployment configuration
+
+Set these backend environment variables in the Render API service:
+
+```text
+ENVIRONMENT=production
+DATABASE_URL=<Render PostgreSQL connection string>
+JWT_SECRET_KEY=<random secret of at least 16 characters>
+FRONTEND_ORIGINS=http://localhost:5173,https://orderflow-frontend-lkno.onrender.com
+```
+
+Set this frontend environment variable in the Render static site before its
+build:
+
+```text
+VITE_API_BASE_URL=https://orderflow-zo5f.onrender.com
+```
+
+Use `alembic upgrade head` as the backend pre-deploy command, then start the
+API with `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Build the frontend
+with `npm install && npm run build` and publish `frontend/dist`. Changing
+`VITE_API_BASE_URL` requires a new frontend build and redeployment.
+
+After both services deploy, verify `/health`, `/ready`, and
+`/api/v1/products?page_size=1` directly. A successful health response does not
+prove that PostgreSQL is reachable; the product request must also succeed.
 
 Run the baseline backend tests from the repository root:
 

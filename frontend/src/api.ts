@@ -15,6 +15,10 @@ function resolveApiOrigin(): string {
 
 export const API_BASE_URL = `${resolveApiOrigin()}/api/v1`;
 
+if (import.meta.env.DEV) {
+  console.info(`[OrderFlow] API base URL: ${API_BASE_URL}`);
+}
+
 const defaultHeaders = { "Content-Type": "application/json" };
 
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

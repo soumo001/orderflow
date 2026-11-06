@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { createRoot } from "react-dom/client";
 
+import { request } from "./api";
 import "./styles.css";
 import "./polish.css";
 
@@ -16,23 +17,6 @@ type User = { id: string; email: string; first_name: string; last_name: string; 
 type Order = { id: string; status: string; total: string; subtotal: string; created_at: string; items: { product_id: string; quantity: number }[] };
 type Inventory = { product_id: string; quantity: number; reserved_quantity: number; available_quantity: number; low_stock_threshold: number };
 type Page = "home" | "catalogue" | "cart" | "orders" | "operations" | "inventory";
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
-const headers = { "Content-Type": "application/json" };
-
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem("orderflow_access");
-  const response = await fetch(`${API}${path}`, {
-    ...options,
-    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers },
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    const detail = Array.isArray(body.detail) ? body.detail.map((item: { msg?: string }) => item.msg).join(", ") : body.detail;
-    throw new Error(detail ?? "Request failed");
-  }
-  return response.status === 204 ? (undefined as T) : response.json();
-}
 
 function App() {
   const [page, setPage] = useState<Page>((location.hash.slice(1) as Page) || "home");
