@@ -14,16 +14,21 @@ class Settings(BaseSettings):
     jwt_secret_key: str = Field(default="local-development-only-change-me", min_length=16)
     jwt_access_token_minutes: int = 15
     jwt_refresh_token_days: int = 7
-    frontend_origins: str = "http://localhost:5173"
+    frontend_origins: str = (
+        "http://localhost:5173,https://orderflow-frontend-lkno.onrender.com"
+    )
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @property
     def cors_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.frontend_origins.split(",") if origin.strip()]
+        return [
+            origin.strip().rstrip("/")
+            for origin in self.frontend_origins.split(",")
+            if origin.strip()
+        ]
 
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-
